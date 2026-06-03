@@ -1,0 +1,21 @@
+{
+  "name": "BarManager",
+  "short_name": "BarManager",
+  "description": "Application de gestion de bar",
+  "start_url": "/barmanager/",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#f59e0b",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/f59e0b/000000?text=BM",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/f59e0b/000000?text=BM",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
