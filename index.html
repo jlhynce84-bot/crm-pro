@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --surface3: #222d42;
+    --border: rgba(255,255,255,0.07);
+    --accent: #4f8ef7;
+    --accent2: #7c5cfc;
+    --green: #22d3a5;
+    --orange: #f59e0b;
+    --red: #f87171;
+    --text: #e8edf8;
+    --muted: #7a87a1;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 230px; min-height: 100vh; background: var(--surface);
+    border-right: 1px solid var(--border); display: flex; flex-direction: column;
+    position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
+  }
+  .logo {
+    padding: 24px 20px 20px; border-bottom: 1px solid var(--border);
+    font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--accent); }
+  .logo small { display: block; font-size: 11px; color: var(--muted); font-weight: 400; font-family: 'DM Sans', sans-serif; margin-top: 2px; }
+  .nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px;
+    cursor: pointer; color: var(--muted); font-size: 13.5px; font-weight: 500;
+    transition: all 0.15s; border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(79,142,247,0.15); color: var(--accent); }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .nav-badge { margin-left: auto; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 20px; }
+  .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
+  .user-card { display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .user-info { overflow: hidden; }
+  .user-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--muted); }
+
+  /* MAIN */
+  .main { margin-left: 230px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar {
+    padding: 16px 28px; border-bottom: 1px solid var(--border); display: flex;
+    align-items: center; gap: 16px; background: var(--surface); position: sticky; top: 0; z-index: 50;
+  }
+  .topbar h1 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; flex: 1; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 8px;
+    border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #3a7ae8; }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--surface3); }
+  .btn-danger { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+  .btn-danger:hover { background: rgba(248,113,113,0.25); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .search-box {
+    display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 12px; width: 260px;
+  }
+  .search-box input { background: none; border: none; outline: none; color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; flex: 1; }
+  .search-box input::placeholder { color: var(--muted); }
+  .search-box svg { color: var(--muted); width: 15px; height: 15px; flex-shrink: 0; }
+  .content { padding: 28px; flex: 1; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: var(--surface2); border-radius: 10px; padding: 4px; width: fit-content; }
+  .tab { padding: 7px 16px; border-radius: 7px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--muted); transition: all 0.15s; border: none; background: none; font-family: 'DM Sans', sans-serif; }
+  .tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+
+  /* DASHBOARD */
+  .kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; position: relative; overflow: hidden;
+  }
+  .kpi-card::before { content: ''; position: absolute; inset: 0; opacity: 0.04; }
+  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 8px; }
+  .kpi-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; line-height: 1; }
+  .kpi-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .kpi-sub .up { color: var(--green); }
+  .kpi-sub .down { color: var(--red); }
+  .kpi-icon { position: absolute; right: 16px; top: 16px; opacity: 0.15; }
+  .kpi-icon svg { width: 36px; height: 36px; }
+
+  .dash-grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+
+  /* PIPELINE MINI */
+  .pipeline-mini { display: flex; flex-direction: column; gap: 8px; }
+  .pipeline-mini-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface2); border-radius: 8px; }
+  .stage-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .pm-name { flex: 1; font-size: 13px; font-weight: 500; }
+  .pm-amount { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--accent); }
+  .pm-stage { font-size: 11px; color: var(--muted); }
+
+  /* ACTIVITÉ */
+  .activity-list { display: flex; flex-direction: column; gap: 0; }
+  .activity-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .activity-item:last-child { border-bottom: none; }
+  .act-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+  .act-body { flex: 1; }
+  .act-text { font-size: 13px; line-height: 1.4; }
+  .act-text strong { font-weight: 500; }
+  .act-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* CONTACTS */
+  .contacts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .contact-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px; cursor: pointer; transition: border-color 0.15s, transform 0.15s;
+  }
+  .contact-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .contact-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .contact-avatar { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .contact-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+  .contact-company { font-size: 12px; color: var(--muted); }
+  .contact-tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .contact-meta { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+  .contact-meta-row { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
+  .contact-meta-row svg { width: 12px; height: 12px; flex-shrink: 0; }
+  .contact-actions { display: flex; gap: 6px; margin-top: 12px; }
+
+  /* TABLE contacts liste */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--surface2); }
+  th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+  td { padding: 12px 16px; font-size: 13px; border-top: 1px solid var(--border); }
+  tr:hover td { background: var(--surface2); }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .tag-client { background: rgba(34,211,165,0.15); color: var(--green); }
+  .tag-prospect { background: rgba(79,142,247,0.15); color: var(--accent); }
+  .tag-partenaire { background: rgba(124,92,252,0.15); color: var(--accent2); }
+  .tag-inactif { background: rgba(255,255,255,0.07); color: var(--muted); }
+
+  /* PIPELINE */
+  .pipeline-board { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 12px; }
+  .pipeline-col { min-width: 240px; width: 240px; flex-shrink: 0; }
+  .pipeline-col-header { padding: 12px 14px; border-radius: 10px 10px 0 0; display: flex; align-items: center; justify-content: space-between; }
+  .pipeline-col-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
+  .pipeline-col-count { font-size: 11px; background: rgba(255,255,255,0.1); padding: 2px 7px; border-radius: 20px; font-weight: 600; }
+  .pipeline-col-body { background: var(--surface2); border-radius: 0 0 10px 10px; min-height: 300px; padding: 10px; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--border); border-top: none; }
+  .deal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 13px; cursor: grab; transition: box-shadow 0.15s; }
+  .deal-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.15); }
+  .deal-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .deal-company { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .deal-footer { display: flex; align-items: center; justify-content: space-between; }
+  .deal-amount { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: var(--green); }
+  .deal-prob { font-size: 11px; color: var(--muted); }
+  .deal-avatar-sm { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; }
+
+  /* INTERACTIONS */
+  .interactions-layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+  .interaction-list { display: flex; flex-direction: column; gap: 10px; }
+  .interaction-item {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px; display: flex; gap: 14px; cursor: pointer; transition: border-color 0.15s;
+  }
+  .interaction-item:hover { border-color: rgba(79,142,247,0.4); }
+  .int-icon-wrap { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .int-body { flex: 1; }
+  .int-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+  .int-title { font-size: 14px; font-weight: 600; }
+  .int-date { font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .int-contact { font-size: 12px; color: var(--accent); margin-bottom: 6px; }
+  .int-note { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .int-type-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+
+  /* STAT BARS */
+  .stat-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .stat-bar-label { font-size: 12px; width: 90px; color: var(--muted); flex-shrink: 0; }
+  .stat-bar-track { flex: 1; height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+  .stat-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+  .stat-bar-val { font-size: 12px; font-weight: 600; width: 30px; text-align: right; }
+
+  /* MODALS */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 520px; max-width: 95vw; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: transform 0.2s; }
+  .modal-overlay.open .modal { transform: scale(1); }
+  .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+  .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; padding: 4px; border-radius: 6px; transition: color 0.15s; }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  input, select, textarea {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 9px 12px; color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif;
+    outline: none; transition: border-color 0.15s; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  select option { background: var(--surface2); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* DETAIL PANEL */
+  .detail-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; height: fit-content; position: sticky; top: 80px; }
+  .detail-header { text-align: center; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  .detail-avatar { width: 60px; height: 60px; border-radius: 14px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #fff; }
+  .detail-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+  .detail-company { font-size: 13px; color: var(--muted); }
+  .detail-row { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row svg { color: var(--muted); width: 14px; height: 14px; flex-shrink: 0; }
+  .detail-label { color: var(--muted); font-size: 11px; min-width: 70px; }
+  .detail-val { flex: 1; font-size: 13px; }
+
+  /* CHART (pure CSS) */
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; padding-top: 10px; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+  .bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.6s cubic-bezier(0.4,0,0.2,1); }
+  .bar-label { font-size: 10px; color: var(--muted); }
+
+  /* DONUT chart */
+  .donut-wrap { position: relative; width: 100px; height: 100px; margin: 0 auto 12px; }
+  .donut-wrap svg { transform: rotate(-90deg); }
+  .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .donut-num { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+  .donut-sub { font-size: 10px; color: var(--muted); }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-state svg { width: 48px; height: 48px; opacity: 0.3; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* TOASTS */
+  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .toast { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: 13px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: slideIn 0.3s ease; min-width: 260px; }
+  .toast.success { border-left: 3px solid var(--green); }
+  .toast.error { border-left: 3px solid var(--red); }
+  @keyframes slideIn { from { transform: translateX(60px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  .scrollbar-hide { scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .sidebar { width: 60px; }
+    .sidebar .logo small, .sidebar .nav-item span, .sidebar .user-info, .logo .crm-text { display: none; }
+    .logo { padding: 20px 14px; font-size: 22px; }
+    .main { margin-left: 60px; }
+    .kpi-row { grid-template-columns: repeat(2,1fr); }
+    .dash-grid { grid-template-columns: 1fr; }
+    .interactions-layout { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+    .contacts-grid { grid-template-columns: 1fr; }
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+  .view-toggle { display: flex; gap: 4px; }
+  .view-btn { padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: none; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+  .view-btn.active { background: var(--surface2); color: var(--text); }
+  .funnel-progress { height: 8px; background: var(--surface3); border-radius: 4px; overflow: hidden; margin-top: 8px; }
+  .funnel-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <span>CRM</span><span class="crm-text"> Pro</span>
+    <small>Gestion relation client</small>
+  </div>
+  <nav class="nav">
+    <button class="nav-item active" onclick="goTo('dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span>Tableau de bord</span>
+    </button>
+    <button class="nav-item" onclick="goTo('contacts',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Contacts</span>
+      <span class="nav-badge" id="badge-contacts">0</span>
+    </button>
+    <button class="nav-item" onclick="goTo('pipeline',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Pipeline</span>
+      <span class="nav-badge" id="badge-pipeline">0</span>
+    </button>
+    <button class="nav-item" onclick="goTo('interactions',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Interactions</span>
+      <span class="nav-badge" id="badge-interactions">0</span>
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Arnod</div>
+        <div class="user-role">Administrateur</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="topbar">
+      <h1>Tableau de bord</h1>
+      <span style="font-size:12px;color:var(--muted)" id="dash-date"></span>
+    </div>
+    <div class="content">
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">Contacts</div>
+          <div class="kpi-value" id="kpi-contacts">0</div>
+          <div class="kpi-sub">Total base de contacts</div>
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="color:var(--accent)"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Affaires actives</div>
+          <div class="kpi-value" id="kpi-deals">0</div>
+          <div class="kpi-sub">Dans le pipeline</div>
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="color:var(--green)"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Valeur pipeline</div>
+          <div class="kpi-value" id="kpi-value" style="font-size:22px;padding-top:4px">0</div>
+          <div class="kpi-sub">Montant total des affaires</div>
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="color:var(--orange)"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Interactions</div>
+          <div class="kpi-value" id="kpi-interactions">0</div>
+          <div class="kpi-sub">Total enregistrées</div>
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="color:var(--accent2)"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <!-- Pipeline aperçu -->
+          <div class="card">
+            <div class="card-title">
+              Pipeline — aperçu par étape
+              <button class="btn btn-ghost btn-sm" onclick="goTo('pipeline',document.querySelector('[onclick*=pipeline]'))">Voir tout →</button>
+            </div>
+            <div id="dash-pipeline-bars" class="bar-chart"></div>
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap" id="dash-pipeline-legend"></div>
+          </div>
+          <!-- Répartition contacts -->
+          <div class="card">
+            <div class="card-title">Répartition des contacts</div>
+            <div id="dash-contact-stats"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <!-- Top affaires -->
+          <div class="card">
+            <div class="card-title">Meilleures affaires</div>
+            <div class="pipeline-mini" id="dash-top-deals"></div>
+          </div>
+          <!-- Activité récente -->
+          <div class="card">
+            <div class="card-title">Activité récente</div>
+            <div class="activity-list" id="dash-activity"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACTS -->
+  <div class="page" id="page-contacts">
+    <div class="topbar">
+      <h1>Contacts</h1>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Rechercher un contact…" id="search-contacts" oninput="renderContacts()">
+      </div>
+      <select style="width:auto;padding:7px 12px" id="filter-type" onchange="renderContacts()">
+        <option value="">Tous types</option>
+        <option value="Client">Client</option>
+        <option value="Prospect">Prospect</option>
+        <option value="Partenaire">Partenaire</option>
+        <option value="Inactif">Inactif</option>
+      </select>
+      <div class="view-toggle">
+        <button class="view-btn active" id="view-grid-btn" onclick="setView('grid')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </button>
+        <button class="view-btn" id="view-list-btn" onclick="setView('list')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </button>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('contact')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ajouter
+      </button>
+    </div>
+    <div class="content">
+      <div id="contacts-container"></div>
+    </div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="page" id="page-pipeline">
+    <div class="topbar">
+      <h1>Pipeline commercial</h1>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Rechercher une affaire…" id="search-deals" oninput="renderPipeline()">
+      </div>
+      <button class="btn btn-primary" onclick="openModal('deal')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouvelle affaire
+      </button>
+    </div>
+    <div class="content">
+      <div style="margin-bottom:16px;display:flex;gap:16px;flex-wrap:wrap" id="pipeline-totals"></div>
+      <div class="pipeline-board scrollbar-hide" id="pipeline-board"></div>
+    </div>
+  </div>
+
+  <!-- INTERACTIONS -->
+  <div class="page" id="page-interactions">
+    <div class="topbar">
+      <h1>Interactions</h1>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Rechercher…" id="search-interactions" oninput="renderInteractions()">
+      </div>
+      <select style="width:auto;padding:7px 12px" id="filter-int-type" onchange="renderInteractions()">
+        <option value="">Tous types</option>
+        <option value="Appel">Appel</option>
+        <option value="Email">Email</option>
+        <option value="Réunion">Réunion</option>
+        <option value="Visite">Visite</option>
+        <option value="Note">Note</option>
+      </select>
+      <button class="btn btn-primary" onclick="openModal('interaction')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Enregistrer
+      </button>
+    </div>
+    <div class="content">
+      <div class="interactions-layout">
+        <div class="interaction-list" id="interactions-list"></div>
+        <div id="int-stats-panel"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalIfOverlay(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Modal</div>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" id="modal-save" onclick="saveModal()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-container" id="toasts"></div>
+
+<script>
+// ===== DATA =====
+let data = JSON.parse(localStorage.getItem('crm_data') || 'null') || {
+  contacts: [
+    { id: 1, name: 'Sophie Mbemba', company: 'Pharmacie Centrale', email: 'sophie@pharma.cd', phone: '+242 06 123 4567', type: 'Client', city: 'Brazzaville', color: '#4f8ef7', notes: 'Cliente fidèle depuis 2022' },
+    { id: 2, name: 'Jean-Paul Ossoko', company: 'Hôpital BLANCHE GOMEZ', email: 'jp.ossoko@hbg.cg', phone: '+242 05 987 6543', type: 'Partenaire', city: 'Brazzaville', color: '#7c5cfc', notes: 'Contact clé en maternité' },
+    { id: 3, name: 'Marie Loukila', company: 'Clinique Espoir', email: 'marie.l@clinique.cg', phone: '+242 06 555 7890', type: 'Prospect', city: 'Pointe-Noire', color: '#22d3a5', notes: 'Intéressée par TOT\'HEMA' },
+    { id: 4, name: 'Bernard Mouketo', company: 'Bar Le Tropique', email: 'b.mouketo@gmail.com', phone: '+242 06 777 1234', type: 'Client', city: 'Brazzaville', color: '#f59e0b', notes: 'Client bar & restaurant' },
+  ],
+  deals: [
+    { id: 1, title: 'Commande TOT\'HEMA Q3', company: 'Pharmacie Centrale', contactId: 1, amount: 450000, stage: 'Proposition', prob: 70, notes: 'Devis envoyé', color: '#4f8ef7' },
+    { id: 2, title: 'Partenariat matériel médical', company: 'Hôpital BLANCHE GOMEZ', contactId: 2, amount: 1200000, stage: 'Négociation', prob: 55, notes: 'RDV prévu', color: '#7c5cfc' },
+    { id: 3, title: 'Lancement HELMINTOX', company: 'Clinique Espoir', contactId: 3, amount: 280000, stage: 'Contact initial', prob: 20, notes: 'Premier contact établi', color: '#22d3a5' },
+    { id: 4, title: 'Renouvellement contrat bar', company: 'Bar Le Tropique', contactId: 4, amount: 120000, stage: 'Gagné', prob: 100, notes: 'Contrat signé', color: '#f59e0b' },
+  ],
+  interactions: [
+    { id: 1, type: 'Visite', title: 'Visite terrain pharmacie', contactId: 1, date: '2026-05-28', note: 'Présentation catalogue Pierre Fabre. Commande probable en juin.' },
+    { id: 2, type: 'Email', title: 'Envoi du devis Q3', contactId: 1, date: '2026-05-30', note: 'Devis TOT\'HEMA et HELMINTOX envoyé par email.' },
+    { id: 3, type: 'Réunion', title: 'Réunion partenariat', contactId: 2, date: '2026-05-25', note: 'Discussion partenariat matériel obstétrique.' },
+    { id: 4, type: 'Appel', title: 'Premier appel prospect', contactId: 3, date: '2026-05-31', note: 'Intérêt confirmé pour TOT\'HEMA. RDV à planifier.' },
+  ],
+  nextId: 10
+};
+
+const STAGES = ['Contact initial','Qualification','Proposition','Négociation','Gagné','Perdu'];
+const STAGE_COLORS = { 'Contact initial':'#7a87a1','Qualification':'#4f8ef7','Proposition':'#f59e0b','Négociation':'#7c5cfc','Gagné':'#22d3a5','Perdu':'#f87171' };
+const TYPE_COLORS = { 'Client':'#22d3a5','Prospect':'#4f8ef7','Partenaire':'#7c5cfc','Inactif':'#7a87a1' };
+const INT_ICONS = { 'Appel':'📞','Email':'✉️','Réunion':'🤝','Visite':'🚶','Note':'📝' };
+const INT_COLORS = { 'Appel':'rgba(34,211,165,0.15)','Email':'rgba(79,142,247,0.15)','Réunion':'rgba(124,92,252,0.15)','Visite':'rgba(245,158,11,0.15)','Note':'rgba(255,255,255,0.07)' };
+const COLORS = ['#4f8ef7','#7c5cfc','#22d3a5','#f59e0b','#f87171','#06b6d4','#ec4899'];
+const AVATAR_COLORS = ['#4f8ef7','#7c5cfc','#22d3a5','#f59e0b','#f87171','#06b6d4'];
+
+function save() { localStorage.setItem('crm_data', JSON.stringify(data)); }
+function fmt(n) { return n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(0)+'k' : n+''; }
+function fmtFull(n) { return Number(n).toLocaleString('fr-FR') + ' FCFA'; }
+function initials(name) { return name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+function getContact(id) { return data.contacts.find(c=>c.id==id) || {}; }
+function randomColor(seed) { return AVATAR_COLORS[Math.abs(seed||0) % AVATAR_COLORS.length]; }
+
+// ===== NAVIGATION =====
+let currentModal = null;
+let contactView = 'grid';
+
+function goTo(page, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if (el) el.classList.add('active');
+  renderPage(page);
+}
+
+function renderPage(p) {
+  updateBadges();
+  if (p==='dashboard') renderDashboard();
+  if (p==='contacts') renderContacts();
+  if (p==='pipeline') renderPipeline();
+  if (p==='interactions') renderInteractions();
+}
+
+function updateBadges() {
+  document.getElementById('badge-contacts').textContent = data.contacts.length;
+  document.getElementById('badge-pipeline').textContent = data.deals.filter(d=>d.stage!=='Gagné'&&d.stage!=='Perdu').length;
+  document.getElementById('badge-interactions').textContent = data.interactions.length;
+}
+
+function setView(v) {
+  contactView = v;
+  document.getElementById('view-grid-btn').classList.toggle('active', v==='grid');
+  document.getElementById('view-list-btn').classList.toggle('active', v==='list');
+  renderContacts();
+}
+
+// ===== DASHBOARD =====
+function renderDashboard() {
+  const d = document.getElementById('dash-date');
+  d.textContent = new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  document.getElementById('kpi-contacts').textContent = data.contacts.length;
+  const activeDeals = data.deals.filter(x=>x.stage!=='Gagné'&&x.stage!=='Perdu');
+  document.getElementById('kpi-deals').textContent = activeDeals.length;
+  const total = data.deals.reduce((s,x)=>s+Number(x.amount),0);
+  document.getElementById('kpi-value').textContent = fmt(total)+' FCFA';
+  document.getElementById('kpi-interactions').textContent = data.interactions.length;
+
+  // Bar chart by stage
+  const stageTotals = {};
+  STAGES.forEach(s=>stageTotals[s]=0);
+  data.deals.forEach(d=>{ stageTotals[d.stage]=(stageTotals[d.stage]||0)+Number(d.amount); });
+  const max = Math.max(...Object.values(stageTotals),1);
+  const bars = document.getElementById('dash-pipeline-bars');
+  bars.innerHTML = STAGES.map(s=>`
+    <div class="bar-wrap">
+      <div class="bar" style="background:${STAGE_COLORS[s]};height:${Math.max(4,Math.round(stageTotals[s]/max*110))}px" title="${fmtFull(stageTotals[s])}"></div>
+      <div class="bar-label">${s.split(' ')[0]}</div>
+    </div>`).join('');
+
+  const legend = document.getElementById('dash-pipeline-legend');
+  legend.innerHTML = STAGES.map(s=>`<span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:8px;height:8px;border-radius:2px;background:${STAGE_COLORS[s]};display:inline-block"></span>${s}: <b style="color:var(--text)">${fmt(stageTotals[s])}</b></span>`).join('');
+
+  // Contact stats
+  const types = ['Client','Prospect','Partenaire','Inactif'];
+  const stats = document.getElementById('dash-contact-stats');
+  stats.innerHTML = types.map(t=>{
+    const n = data.contacts.filter(c=>c.type===t).length;
+    const pct = data.contacts.length ? Math.round(n/data.contacts.length*100) : 0;
+    return `<div class="stat-bar-row">
+      <div class="stat-bar-label">${t}</div>
+      <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${pct}%;background:${TYPE_COLORS[t]}"></div></div>
+      <div class="stat-bar-val" style="color:${TYPE_COLORS[t]}">${n}</div>
+    </div>`;
+  }).join('');
+
+  // Top deals
+  const top = [...data.deals].sort((a,b)=>b.amount-a.amount).slice(0,4);
+  const td = document.getElementById('dash-top-deals');
+  td.innerHTML = top.length ? top.map(d=>`
+    <div class="pipeline-mini-item">
+      <div class="stage-dot" style="background:${STAGE_COLORS[d.stage]}"></div>
+      <div><div class="pm-name">${d.title}</div><div class="pm-stage">${d.stage}</div></div>
+      <div class="pm-amount">${fmt(d.amount)}</div>
+    </div>`).join('') : '<p style="color:var(--muted);font-size:13px">Aucune affaire</p>';
+
+  // Recent activity
+  const recent = [...data.interactions].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  const act = document.getElementById('dash-activity');
+  act.innerHTML = recent.length ? recent.map(i=>{
+    const c = getContact(i.contactId);
+    return `<div class="activity-item">
+      <div class="act-icon" style="background:${INT_COLORS[i.type]||'rgba(255,255,255,0.07)'}">${INT_ICONS[i.type]||'💬'}</div>
+      <div class="act-body">
+        <div class="act-text"><strong>${i.title}</strong>${c.name?' — '+c.name:''}</div>
+        <div class="act-time">${formatDate(i.date)}</div>
+      </div>
+    </div>`;
+  }).join('') : '<p style="color:var(--muted);font-size:13px">Aucune activité</p>';
+}
+
+function formatDate(s) {
+  if (!s) return '';
+  const d = new Date(s+'T00:00:00');
+  return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
+}
+
+// ===== CONTACTS =====
+function renderContacts() {
+  const q = (document.getElementById('search-contacts')?.value||'').toLowerCase();
+  const tf = document.getElementById('filter-type')?.value||'';
+  let list = data.contacts.filter(c=>{
+    const match = !q || c.name.toLowerCase().includes(q) || (c.company||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q);
+    const typeMatch = !tf || c.type===tf;
+    return match && typeMatch;
+  });
+
+  const container = document.getElementById('contacts-container');
+  if (!list.length) {
+    container.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><p>Aucun contact trouvé</p></div>`;
+    return;
+  }
+
+  if (contactView === 'grid') {
+    container.innerHTML = `<div class="contacts-grid">${list.map(c=>contactCardHTML(c)).join('')}</div>`;
+  } else {
+    container.innerHTML = `<div class="table-wrap"><table>
+      <thead><tr><th>Contact</th><th>Entreprise</th><th>Type</th><th>Ville</th><th>Email</th><th>Téléphone</th><th>Actions</th></tr></thead>
+      <tbody>${list.map(c=>`<tr>
+        <td><div style="display:flex;align-items:center;gap:10px">
+          <div class="deal-avatar-sm" style="background:${c.color||randomColor(c.id)};width:30px;height:30px;border-radius:8px;font-size:11px">${initials(c.name)}</div>
+          <span style="font-weight:500">${c.name}</span></div></td>
+        <td>${c.company||'—'}</td>
+        <td><span class="tag tag-${(c.type||'').toLowerCase()}">${c.type||''}</span></td>
+        <td>${c.city||'—'}</td>
+        <td style="color:var(--muted)">${c.email||'—'}</td>
+        <td style="color:var(--muted)">${c.phone||'—'}</td>
+        <td><div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="editContact(${c.id})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteContact(${c.id})">🗑</button>
+        </div></td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+  }
+}
+
+function contactCardHTML(c) {
+  const color = c.color || randomColor(c.id);
+  const typeClass = 'tag-'+(c.type||'').toLowerCase();
+  return `<div class="contact-card" onclick="editContact(${c.id})">
+    <div class="contact-header">
+      <div class="contact-avatar" style="background:${color}">${initials(c.name)}</div>
+      <div>
+        <div class="contact-name">${c.name}</div>
+        <div class="contact-company">${c.company||'—'}</div>
+      </div>
+      <div style="margin-left:auto"><span class="tag ${typeClass}">${c.type||''}</span></div>
+    </div>
+    <div class="contact-meta">
+      ${c.email?`<div class="contact-meta-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>${c.email}</div>`:''}
+      ${c.phone?`<div class="contact-meta-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 10.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.61 0h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 7.91a16 16 0 0 0 6.29 6.29l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>${c.phone}</div>`:''}
+      ${c.city?`<div class="contact-meta-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${c.city}</div>`:''}
+    </div>
+    <div class="contact-actions" onclick="event.stopPropagation()">
+      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="editContact(${c.id})">✏️ Modifier</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteContact(${c.id})">🗑</button>
+    </div>
+  </div>`;
+}
+
+function deleteContact(id) {
+  if (!confirm('Supprimer ce contact ?')) return;
+  data.contacts = data.contacts.filter(c=>c.id!==id);
+  save(); renderContacts(); updateBadges(); toast('Contact supprimé','error');
+}
+
+// ===== PIPELINE =====
+function renderPipeline() {
+  const q = (document.getElementById('search-deals')?.value||'').toLowerCase();
+  const board = document.getElementById('pipeline-board');
+  const totals = document.getElementById('pipeline-totals');
+
+  let deals = data.deals.filter(d=>!q||d.title.toLowerCase().includes(q)||(d.company||'').toLowerCase().includes(q));
+
+  // Totals strip
+  const totalAmt = data.deals.filter(d=>d.stage!=='Perdu').reduce((s,d)=>s+Number(d.amount),0);
+  const wonAmt = data.deals.filter(d=>d.stage==='Gagné').reduce((s,d)=>s+Number(d.amount),0);
+  totals.innerHTML = `
+    <div class="kpi-card" style="padding:12px 16px;flex:1">
+      <div class="kpi-label">Valeur totale pipeline</div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--accent)">${fmtFull(totalAmt)}</div>
+    </div>
+    <div class="kpi-card" style="padding:12px 16px;flex:1">
+      <div class="kpi-label">Affaires gagnées</div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--green)">${fmtFull(wonAmt)}</div>
+    </div>
+    <div class="kpi-card" style="padding:12px 16px;flex:1">
+      <div class="kpi-label">Taux de conversion</div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--orange)">${data.deals.length ? Math.round(data.deals.filter(d=>d.stage==='Gagné').length/data.deals.length*100) : 0}%</div>
+    </div>`;
+
+  board.innerHTML = STAGES.map(stage=>{
+    const stageDeals = deals.filter(d=>d.stage===stage);
+    const stageTotal = stageDeals.reduce((s,d)=>s+Number(d.amount),0);
+    return `<div class="pipeline-col">
+      <div class="pipeline-col-header" style="background:${STAGE_COLORS[stage]}22;border-top:3px solid ${STAGE_COLORS[stage]}">
+        <span class="pipeline-col-title" style="color:${STAGE_COLORS[stage]}">${stage}</span>
+        <span class="pipeline-col-count">${stageDeals.length}</span>
+      </div>
+      <div class="pipeline-col-body">
+        ${stageDeals.map(d=>dealCardHTML(d)).join('')}
+        ${!stageDeals.length ? '<div style="text-align:center;color:var(--muted);font-size:12px;padding:20px 0">Aucune affaire</div>' : ''}
+        <div style="margin-top:6px;text-align:center;font-size:11px;color:var(--muted);font-family:\'Syne\',sans-serif;font-weight:700">${fmt(stageTotal)} FCFA</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function dealCardHTML(d) {
+  const c = getContact(d.contactId);
+  const color = d.color || randomColor(d.id);
+  return `<div class="deal-card" onclick="editDeal(${d.id})">
+    <div class="deal-title">${d.title}</div>
+    <div class="deal-company">${d.company||'—'}${c.name?' · '+c.name:''}</div>
+    <div class="funnel-progress"><div class="funnel-fill" style="width:${d.prob||0}%"></div></div>
+    <div style="font-size:10px;color:var(--muted);margin-top:4px;margin-bottom:8px">Probabilité : ${d.prob||0}%</div>
+    <div class="deal-footer">
+      <div class="deal-amount">${fmtFull(d.amount)}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="btn btn-danger btn-sm" style="padding:3px 8px;font-size:11px" onclick="event.stopPropagation();deleteDeal(${d.id})">🗑</button>
+        <div class="deal-avatar-sm" style="background:${color}">${initials(d.company||'?')}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function deleteDeal(id) {
+  if (!confirm('Supprimer cette affaire ?')) return;
+  data.deals = data.deals.filter(d=>d.id!==id);
+  save(); renderPipeline(); updateBadges(); toast('Affaire supprimée','error');
+}
+
+// ===== INTERACTIONS =====
+function renderInteractions() {
+  const q = (document.getElementById('search-interactions')?.value||'').toLowerCase();
+  const tf = document.getElementById('filter-int-type')?.value||'';
+  let list = data.interactions.filter(i=>{
+    const c = getContact(i.contactId);
+    const match = !q || i.title.toLowerCase().includes(q) || (i.note||'').toLowerCase().includes(q) || (c.name||'').toLowerCase().includes(q);
+    const typeMatch = !tf || i.type===tf;
+    return match && typeMatch;
+  }).sort((a,b)=>b.date.localeCompare(a.date));
+
+  const el = document.getElementById('interactions-list');
+  el.innerHTML = list.length ? list.map(i=>{
+    const c = getContact(i.contactId);
+    return `<div class="interaction-item" onclick="editInteraction(${i.id})">
+      <div class="int-icon-wrap" style="background:${INT_COLORS[i.type]||'rgba(255,255,255,0.07)'}">${INT_ICONS[i.type]||'💬'}</div>
+      <div class="int-body">
+        <div class="int-header">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="int-title">${i.title}</div>
+            <span class="int-type-badge" style="background:${INT_COLORS[i.type]||'rgba(255,255,255,0.07)'}">${i.type}</span>
+          </div>
+          <div class="int-date">${formatDate(i.date)}</div>
+        </div>
+        <div class="int-contact">👤 ${c.name||'—'}${c.company?' · '+c.company:''}</div>
+        <div class="int-note">${i.note||'—'}</div>
+        <div style="margin-top:8px">
+          <button class="btn btn-danger btn-sm" style="font-size:11px" onclick="event.stopPropagation();deleteInteraction(${i.id})">🗑 Supprimer</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('') : `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>Aucune interaction enregistrée</p></div>`;
+
+  // Stats panel
+  const types = ['Appel','Email','Réunion','Visite','Note'];
+  const panel = document.getElementById('int-stats-panel');
+  panel.innerHTML = `<div class="card" style="position:sticky;top:80px">
+    <div class="card-title">Statistiques</div>
+    ${types.map(t=>{
+      const n = data.interactions.filter(i=>i.type===t).length;
+      const pct = data.interactions.length ? Math.round(n/data.interactions.length*100) : 0;
+      return `<div class="stat-bar-row">
+        <div class="stat-bar-label">${INT_ICONS[t]} ${t}</div>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${pct}%;background:var(--accent)"></div></div>
+        <div class="stat-bar-val">${n}</div>
+      </div>`;
+    }).join('')}
+    <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-bottom:10px">Par contact</div>
+      ${data.contacts.slice(0,5).map(c=>{
+        const n = data.interactions.filter(i=>i.contactId===c.id).length;
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px">
+          <div style="width:24px;height:24px;border-radius:6px;background:${c.color||randomColor(c.id)};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">${initials(c.name)}</div>
+          <span style="flex:1">${c.name}</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent)">${n}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function deleteInteraction(id) {
+  if (!confirm('Supprimer cette interaction ?')) return;
+  data.interactions = data.interactions.filter(i=>i.id!==id);
+  save(); renderInteractions(); updateBadges(); toast('Interaction supprimée','error');
+}
+
+// ===== MODALS =====
+function openModal(type, existing) {
+  currentModal = { type, existing: existing || null };
+  const overlay = document.getElementById('modal-overlay');
+  const title = document.getElementById('modal-title');
+  const body = document.getElementById('modal-body');
+
+  if (type==='contact') {
+    title.textContent = existing ? 'Modifier le contact' : 'Nouveau contact';
+    const c = existing || {};
+    body.innerHTML = `
+      <div class="form-row">
+        <div class="form-group"><label>Nom complet *</label><input id="f-name" value="${c.name||''}" placeholder="Sophie Mbemba"></div>
+        <div class="form-group"><label>Entreprise</label><input id="f-company" value="${c.company||''}" placeholder="Pharmacie XYZ"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Type</label><select id="f-type">
+          ${['Client','Prospect','Partenaire','Inactif'].map(t=>`<option ${c.type===t?'selected':''}>${t}</option>`).join('')}
+        </select></div>
+        <div class="form-group"><label>Ville</label><input id="f-city" value="${c.city||''}" placeholder="Brazzaville"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Email</label><input id="f-email" type="email" value="${c.email||''}" placeholder="contact@email.com"></div>
+        <div class="form-group"><label>Téléphone</label><input id="f-phone" value="${c.phone||''}" placeholder="+242 06 ..."></div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="f-notes">${c.notes||''}</textarea></div>`;
+  }
+
+  if (type==='deal') {
+    title.textContent = existing ? 'Modifier l\'affaire' : 'Nouvelle affaire';
+    const d = existing || {};
+    body.innerHTML = `
+      <div class="form-group"><label>Titre *</label><input id="f-title" value="${d.title||''}" placeholder="Commande Q3"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Entreprise</label><input id="f-company" value="${d.company||''}" placeholder="Pharmacie XYZ"></div>
+        <div class="form-group"><label>Contact</label><select id="f-contact">
+          <option value="">— aucun —</option>
+          ${data.contacts.map(c=>`<option value="${c.id}" ${d.contactId==c.id?'selected':''}>${c.name}</option>`).join('')}
+        </select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Montant (FCFA)</label><input id="f-amount" type="number" value="${d.amount||''}" placeholder="500000"></div>
+        <div class="form-group"><label>Probabilité (%)</label><input id="f-prob" type="number" min="0" max="100" value="${d.prob||20}" placeholder="50"></div>
+      </div>
+      <div class="form-group"><label>Étape</label><select id="f-stage">
+        ${STAGES.map(s=>`<option ${d.stage===s?'selected':''}>${s}</option>`).join('')}
+      </select></div>
+      <div class="form-group"><label>Notes</label><textarea id="f-notes">${d.notes||''}</textarea></div>`;
+  }
+
+  if (type==='interaction') {
+    title.textContent = existing ? 'Modifier l\'interaction' : 'Nouvelle interaction';
+    const i = existing || {};
+    const today = new Date().toISOString().split('T')[0];
+    body.innerHTML = `
+      <div class="form-row">
+        <div class="form-group"><label>Type</label><select id="f-itype">
+          ${['Appel','Email','Réunion','Visite','Note'].map(t=>`<option ${i.type===t?'selected':''}>${t}</option>`).join('')}
+        </select></div>
+        <div class="form-group"><label>Date</label><input id="f-date" type="date" value="${i.date||today}"></div>
+      </div>
+      <div class="form-group"><label>Titre *</label><input id="f-title" value="${i.title||''}" placeholder="Visite terrain..."></div>
+      <div class="form-group"><label>Contact</label><select id="f-contact">
+        <option value="">— aucun —</option>
+        ${data.contacts.map(c=>`<option value="${c.id}" ${i.contactId==c.id?'selected':''}>${c.name}</option>`).join('')}
+      </select></div>
+      <div class="form-group"><label>Note / Compte-rendu</label><textarea id="f-note">${i.note||''}</textarea></div>`;
+  }
+
+  overlay.classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); currentModal = null; }
+function closeModalIfOverlay(e) { if (e.target===document.getElementById('modal-overlay')) closeModal(); }
+
+function saveModal() {
+  if (!currentModal) return;
+  const { type, existing } = currentModal;
+
+  if (type==='contact') {
+    const name = document.getElementById('f-name').value.trim();
+    if (!name) { toast('Le nom est requis','error'); return; }
+    const obj = {
+      id: existing?.id || data.nextId++,
+      name, company: document.getElementById('f-company').value,
+      type: document.getElementById('f-type').value,
+      city: document.getElementById('f-city').value,
+      email: document.getElementById('f-email').value,
+      phone: document.getElementById('f-phone').value,
+      notes: document.getElementById('f-notes').value,
+      color: existing?.color || COLORS[data.contacts.length % COLORS.length]
+    };
+    if (existing) { const i=data.contacts.findIndex(c=>c.id===existing.id); data.contacts[i]=obj; }
+    else data.contacts.push(obj);
+    save(); closeModal(); renderContacts(); updateBadges(); toast(existing?'Contact mis à jour':'Contact ajouté !');
+  }
+
+  if (type==='deal') {
+    const title = document.getElementById('f-title').value.trim();
+    if (!title) { toast('Le titre est requis','error'); return; }
+    const obj = {
+      id: existing?.id || data.nextId++,
+      title, company: document.getElementById('f-company').value,
+      contactId: parseInt(document.getElementById('f-contact').value)||null,
+      amount: Number(document.getElementById('f-amount').value)||0,
+      prob: Number(document.getElementById('f-prob').value)||0,
+      stage: document.getElementById('f-stage').value,
+      notes: document.getElementById('f-notes').value,
+      color: existing?.color || COLORS[data.deals.length % COLORS.length]
+    };
+    if (existing) { const i=data.deals.findIndex(d=>d.id===existing.id); data.deals[i]=obj; }
+    else data.deals.push(obj);
+    save(); closeModal(); renderPipeline(); updateBadges(); toast(existing?'Affaire mise à jour':'Affaire créée !');
+  }
+
+  if (type==='interaction') {
+    const title = document.getElementById('f-title').value.trim();
+    if (!title) { toast('Le titre est requis','error'); return; }
+    const obj = {
+      id: existing?.id || data.nextId++,
+      type: document.getElementById('f-itype').value,
+      date: document.getElementById('f-date').value,
+      title, contactId: parseInt(document.getElementById('f-contact').value)||null,
+      note: document.getElementById('f-note').value
+    };
+    if (existing) { const i=data.interactions.findIndex(x=>x.id===existing.id); data.interactions[i]=obj; }
+    else data.interactions.push(obj);
+    save(); closeModal(); renderInteractions(); updateBadges(); toast(existing?'Interaction mise à jour':'Interaction enregistrée !');
+  }
+}
+
+function editContact(id) { openModal('contact', data.contacts.find(c=>c.id===id)); }
+function editDeal(id) { openModal('deal', data.deals.find(d=>d.id===id)); }
+function editInteraction(id) { openModal('interaction', data.interactions.find(i=>i.id===id)); }
+
+// ===== TOAST =====
+function toast(msg, type='success') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${type==='success'?'✅':'❌'}</span> ${msg}`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(), 3500);
+}
+
+// ===== INIT =====
+updateBadges();
+renderDashboard();
+document.getElementById('dash-date').textContent = new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+</script>
+</body>
+</html>
